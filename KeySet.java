@@ -10,7 +10,7 @@ public class KeySet {
 	public boolean next() { return next(1); }
 	public boolean next(int n) {
 		index += n;
-		if(index < k.length-2)
+		if(index < k.length)
 			return true;
 		return false;
 	}
@@ -27,24 +27,15 @@ public class KeySet {
 		return -1;
 	}
 	public Key get(int i) {
+		if(i<0)
+			return null;
 		if(i<k.length)
 			return k[i];
-		else
-			return null;
+		return null;
 	}
-	public Key get() { return getNext(0); }
-	public Key getNext(int n) {
-		int tempIndex = index + n;
-		if(tempIndex < 0)
-			return new Key();
-		else if(tempIndex < k.length)
-			return k[tempIndex];
-		else
-			return null;
-	}
-	public Key getNext() {
-		return getNext(1);
-	}
+	public Key get()          { return get(index); }
+	public Key getNext(int n) { return get(index + n); }
+	public Key getNext()      { return getNext(1); }
 	public int getIndex() {
 		return index;
 	}
@@ -55,12 +46,10 @@ public class KeySet {
 		return get().toString();
 	}
 	public int getPos() {
-		if(get()==null) {
-			if(get(-1)==null)
-				return 0;
-			else
-				return get(-1).i()+1;
-		}
+		while(index>=0 && get()==null)
+			index--;
+		if(index<0)
+			return -1;
 		return get().i();
 	}
 }
