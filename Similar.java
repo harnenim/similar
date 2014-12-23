@@ -7,6 +7,7 @@ public class Similar {
 	private static Map<String, KeySet> keySets = new HashMap<String, KeySet>();
 	private int start, end;
 	private double point;
+	private int length;
 
 	public int start() {
 		return start;
@@ -15,16 +16,17 @@ public class Similar {
 		return end;
 	}
 	public double point() {
-		return point;
+		return point/length;
 	}
 
-	private Similar(int start, int end, double point) {
-		this.start = start;
-		this.end   = end  ;
-		this.point = point;
+	private Similar(int start, int end, double point, int length) {
+		this.start  = start ;
+		this.end    = end   ;
+		this.point  = point ;
+		this.length = length;
 	}
-	private static Similar failed() {
-		return new Similar(0, 0, Double.MAX_VALUE);
+	public static Similar failed() {
+		return new Similar(0, 0, Double.MAX_VALUE, 1);
 	}
 	public static Similar test(String src, String cmp) {
 		// 길이가 더 짧은 문자열은 퇴짜
@@ -41,7 +43,7 @@ public class Similar {
 					if(cSrc[i+j]!=cCmp[j])
 						break;
 				if(j==cCmp.length)
-					return new Similar(i, i+j, 0);
+					return new Similar(i, i+j, 0, 1);
 			}
 			return failed();
 		}
@@ -56,15 +58,15 @@ public class Similar {
 		if((kCmp = keySets.get(cmp))==null)
 			kCmp = new KeySet(Key.toKeys(cmp));
 
-		// 첫 2타가 일치할 때만 검사 시작
-		for(int i=0; i<kSrc.length(); i++) {
+		for(int i=0; i<kSrc.length()-4; i++) {
 			kSrc.setIndex(i-1);
 			kCmp.beforeFirst();
 			int j;
+			// 첫 2타가 일치할 때만 검사 시작
 			for(j=0; j<2; j++) {
 				kSrc.next();
 				kCmp.next();
-				if(!kSrc.get().equals(kCmp.get()))
+				if(kSrc.get()==null || kCmp.get()==null || !kSrc.get().equals(kCmp.get()))
 					break;
 			}
 			if(j==2) {
@@ -76,7 +78,7 @@ public class Similar {
 				}
 			}
 		}
-		return new Similar(start, end, point);
+		return new Similar(start, end, point, cmp.length());
 	}
 	private static Similar test(KeySet src, KeySet cmp, double limit) {
 		return test(src, cmp, 0, limit);
@@ -119,7 +121,7 @@ public class Similar {
 									&& src.getNext(i+2).equals(cmp.getNext(j+2))) {
 										src.setIndex(i+1);
 										cmp.setIndex(j+1);
-										return  test(src, cmp, point, limit);
+										return  test(src, cmp, point+(i+j)*0.1, limit);
 									}
 								}
 							}
@@ -133,11 +135,13 @@ public class Similar {
 				// ' 00' 등으로 밀려 쓴 경우
 				// 2번째 글자가 같은 0인 걸로 처리 x
 				// 첫 글자 하나만큼 밀린 걸로 처리해야 함
-				if(src.getNext(0).equals(cmp.getNext(1)) && src.getNext(1).equals(cmp.getNext(2))) {
+				if(src.getNext(1)!=null && cmp.getNext(2)!=null
+				&& src.getNext(0).equals(cmp.getNext(1)) && src.getNext(1).equals(cmp.getNext(2))) {
 					point += cmp.get().wrongPoint(new Key());
 					src.next(1);
 					cmp.next(2);
-				} else if(cmp.getNext(0).equals(src.getNext(1)) && cmp.getNext(1).equals(src.getNext(2))) {
+				} else if(cmp.getNext(1)!=null && src.getNext(2)!=null
+				&& cmp.getNext(0).equals(src.getNext(1)) && cmp.getNext(1).equals(src.getNext(2))) {
 					point += src.get().wrongPoint(new Key());
 					src.next(2);
 					cmp.next(1);
@@ -149,10 +153,10 @@ public class Similar {
 						Distance d2 = src.getNext(pos).distance(cmp.getNext(pos));
 						if(d1.crossPoint(d2)==0) {
 							point += src.get().wrongPoint(cmp.get())/2;
+							// 다음에 다시 확인하게 되므로 점수에 추가 안 되도록 막음
+							src.get(pos).set(cmp.get());
 							src.next();
 							cmp.next();
-							// 다음에 다시 확인하게 되므로 점수에 추가 안 되도록 막음
-							src.getNext().set(cmp.getNext());
 							continue;
 						}
 					}
@@ -164,7 +168,8 @@ public class Similar {
 			if(point > limit)
 				return failed();
 		}
-		return new Similar(0, src.getPos(), point);
+		point += (cmp.length() - cmp.getIndex()) * 2;
+		return new Similar(0, src.getPos(), point, cmp.length());
 	}
 
 	public String toString() {
