@@ -202,6 +202,8 @@ public class Key {
 			.append('/').append(i()).toString();
 	}
 	public boolean equals(Key k) {
+		if(k==null)
+			return false;
 		// return new Distance(this, k).value() == 0;
 		return this.hand   == k.hand
 		    && this.finger == k.finger
@@ -227,13 +229,11 @@ public class Key {
 			for(int j=0; j<c.length; j++)
 				ks[i][j] = new Key(c[j], i);
 		}
-		Key[] kStr = new Key[count+2];
+		Key[] kStr = new Key[count];
 		count = 0;
 		for(int i=0; i<ks.length; i++)
 			for(int j=0; j<ks[i].length; j++)
 				kStr[count++] = ks[i][j];
-		kStr[count++] = new Key(' ', ks.length  );
-		kStr[count  ] = new Key(' ', ks.length+1);
 		return kStr;
 	}
 }
