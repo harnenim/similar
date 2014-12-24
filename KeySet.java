@@ -46,10 +46,13 @@ public class KeySet {
 		return get().toString();
 	}
 	public int getPos() {
-		while(index>=0 && get()==null)
-			index--;
+		if(index>=0 && getNext()==null) {
+			while(get()==null)
+				index--;
+			return get().i()+1;
+		}
 		if(index<0)
 			return -1;
-		return get().i();
+		return getNext().i()-1;
 	}
 }
