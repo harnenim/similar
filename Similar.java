@@ -93,10 +93,18 @@ public class Similar {
 				if(src.getNext()!=null && cmp.getNext()!=null) {
 					Distance d2 = src.getNext(1).distance(cmp.getNext(1));
 					if(d2.value()>0) { // 2타 연속 안 맞음
-						if(src.getNext(0).equals(cmp.getNext(1))
+						if(src.getNext(1) != null && cmp.getNext(2) != null
+						&& src.getNext(0).equals(cmp.getNext(1))
 						&& src.getNext(1).equals(cmp.getNext(2))) { // 탈자
 							point += cmp.get().wrongPoint(new Key());
 							cmp.next();
+
+						} else if(src.getNext(2) != null && cmp.getNext(1) != null
+						       && src.getNext(1).equals(cmp.getNext(0))
+						       && src.getNext(2).equals(cmp.getNext(1))) { // 한 글자 더 들어감
+							point += cmp.get().wrongPoint(new Key());
+							src.next();
+
 						} else if(src.getNext(1).equals(cmp.get())) {
 							Distance d1 = src.get().distance(cmp.get());
 							// 순서 바뀜
@@ -121,7 +129,7 @@ public class Similar {
 									&& src.getNext(i+2).equals(cmp.getNext(j+2))) {
 										src.setIndex(i+1);
 										cmp.setIndex(j+1);
-										return  test(src, cmp, point+(i+j)*0.1, limit);
+										return  test(src, cmp, point+(i+j)/3.0, limit);
 									}
 								}
 							}
