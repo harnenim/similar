@@ -45,14 +45,14 @@ public class KeySet {
 	public String toString() {
 		return get().toString();
 	}
-	public int getPos() {
-		if(index>=0 && get()==null) {
+	public int getPos() { // 탐색 범위가 끝난 다음 위치
+		if(index>=0 && get()==null) { // 범위를 오버했으면 마지막 글자 위치 +1
 			while(get()==null)
 				index--;
 			return get().i()+1;
 		}
 		if(index<0)
 			return -1;
-		return get().i();
+		return get().i(); // 현재 글자 위치
 	}
 }
